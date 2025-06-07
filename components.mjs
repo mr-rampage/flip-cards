@@ -6,9 +6,8 @@ function* makeCycle(items) {
     }
 }
 
-const hideAll = (root) => 
-    Array.from(root.children)
-        .forEach(child => child.style.display = "none")
+const hideAll = (root) => Array.from(root.children)
+    .forEach(child => child.style.display = "none")
 
 const toggleNext = (root, cycler) => {
     hideAll(root)
@@ -20,23 +19,47 @@ const toggleNext = (root, cycler) => {
     }
 }
 
-customElements.define('flip-deck', class extends HTMLElement {
+/**
+ * Mixin that auto-unsubscribes to event listeners when component is removed from the DOM
+ * @param {{prototype: HTMLElement; new(): HTMLElement}} base
+ * @returns {{prototype: HTMLElement; new(): HTMLElement}}
+ */
+const autoUnsubscribe = (base) => class extends base {
+    #unsubscribe = []
+
+    constructor() {
+        super();
+        const addEventListener = this.addEventListener
+
+        this.addEventListener = (type, listener, options) => {
+            addEventListener(type, listener, options)
+            this.#unsubscribe.push(() => this.removeEventListener(type, listener))
+        }
+    }
+
+    disconnectedCallback() {
+        while (this.#unsubscribe.length) {
+            this.#unsubscribe.shift().call()
+        }
+    }
+}
+
+customElements.define('flip-deck', class extends autoUnsubscribe(HTMLElement) {
+    #unsubscribe = []
+
     connectedCallback() {
         const cards = Array.from(this.querySelectorAll('flip-card'))
         cards.forEach(card => card.dataset.cycle = this.dataset.cycle)
 
-        if (this.dataset.type === "random")
-            cards.sort(() => Math.random() - 0.5);
+        if (this.dataset.type === "random") cards.sort(() => Math.random() - 0.5);
 
         const cycle = makeCycle(cards)
         toggleNext(this, cycle)
-        this.addEventListener('done', e =>
-            e.target.tagName.toLowerCase() === 'flip-card' && toggleNext(this, cycle)
-        )
+        this.addEventListener('done', e => e.target.tagName.toLowerCase() === 'flip-card' && toggleNext(this, cycle))
     }
 })
 
-customElements.define('flip-card', class extends HTMLElement {
+customElements.define('flip-card', class extends autoUnsubscribe(HTMLElement) {
     connectedCallback() {
         super.connectedCallback?.()
         const selectAllTypes = this.dataset.cycle

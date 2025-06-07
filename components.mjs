@@ -1,0 +1,55 @@
+function* makeCycle(items) {
+    let index = 0
+    while (index < items.length) {
+        yield items[index]
+        index++
+    }
+}
+
+const hideAll = (root) => 
+    Array.from(root.children)
+        .forEach(child => child.style.display = "none")
+
+const toggleNext = (root, cycler) => {
+    hideAll(root)
+    const next = cycler.next()
+    if (next.done) {
+        root.dispatchEvent(new CustomEvent('done', {bubbles: true, composed: true}))
+    } else {
+        next.value.style.display = 'block'
+    }
+}
+
+customElements.define('flip-deck', class extends HTMLElement {
+    connectedCallback() {
+        const cards = Array.from(this.querySelectorAll('flip-card'))
+        cards.forEach(card => card.dataset.cycle = this.dataset.cycle)
+
+        if (this.dataset.type === "random")
+            cards.sort(() => Math.random() - 0.5);
+
+        const cycle = makeCycle(cards)
+        toggleNext(this, cycle)
+        this.addEventListener('done', e =>
+            e.target.tagName.toLowerCase() === 'flip-card' && toggleNext(this, cycle)
+        )
+    }
+})
+
+customElements.define('flip-card', class extends HTMLElement {
+    connectedCallback() {
+        super.connectedCallback?.()
+        const selectAllTypes = this.dataset.cycle
+            .split(',')
+            .map(type => type.trim())
+            .map(type => `[type="${type}"]`)
+            .join(',')
+        const items = this.querySelectorAll(selectAllTypes)
+        const cycle = makeCycle(items)
+        toggleNext(this, cycle)
+        this.addEventListener('click', () => toggleNext(this, cycle))
+    }
+})
+
+customElements.define('flip-definition', class extends HTMLElement {
+})

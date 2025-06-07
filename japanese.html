@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Japanese Kana</title>
+  <meta charset="UTF-8">
+  <script type="module" src="components.mjs"></script>
+  <style>
+    flip-deck:not(:defined) {
+      display: none;
+    }
+    flip-definition {
+      font-size: 100vh;
+      user-select: none;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <flip-deck data-cycle="English,Katakana,Hirigana" data-type="random">
+    <flip-card>
+      <flip-definition type="English">a</flip-definition>
+      <flip-definition type="Hirigana">あ</flip-definition>
+      <flip-definition type="Katakana">ア</flip-definition>
+    </flip-card>
+    <flip-card>
+      <flip-definition type="English">i</flip-definition>
+      <flip-definition type="Hirigana">い</flip-definition>
+      <flip-definition type="Katakana">イ</flip-definition>
+    </flip-card>
+    <flip-card>
+      <flip-definition type="English">u</flip-definition>
+      <flip-definition type="Hirigana">う</flip-definition>
+      <flip-definition type="Katakana">ウ</flip-definition>
+    </flip-card>
+    <flip-card>
+      <flip-definition type="English">e</flip-definition>
+      <flip-definition type="Hirigana">え</flip-definition>
+      <flip-definition type="Katakana">エ</flip-definition>
+    </flip-card>
+    <flip-card>
+      <flip-definition type="English">o</flip-definition>
+      <flip-definition type="Hirigana">お</flip-definition>
+      <flip-definition type="Katakana">オ</flip-definition>
+    </flip-card>
+  </flip-deck>
+</body>
+</html>

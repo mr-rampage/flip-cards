@@ -29,10 +29,10 @@ const autoUnsubscribe = (base) => class extends base {
 
     constructor() {
         super();
-        const addEventListener = this.addEventListener
+        const original = this.addEventListener
 
         this.addEventListener = (type, listener, options) => {
-            addEventListener(type, listener, options)
+            original.call(this, type, listener, options);
             this.#unsubscribe.push(() => this.removeEventListener(type, listener))
         }
     }

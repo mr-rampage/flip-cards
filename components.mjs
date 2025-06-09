@@ -116,8 +116,10 @@ customElements.define('flip-card', class extends autoUnsubscribe(HTMLElement) {
 customElements.define('flip-definition', class extends HTMLElement {
 })
 
-const enableSubmitOnValidInput = submit => e =>
+const enableSubmitOnValidInput = e => {
+    const submit = e.currentTarget.querySelector('[type="submit"]')
     submit.toggleAttribute('disabled', !e.currentTarget.checkValidity())
+}
 
 const toJson = formData =>
     Array.from(formData.entries()).reduce((json, [key, value]) => ({...json, [key]: value.trim()}), {})
@@ -131,7 +133,7 @@ customElements.define('list-builder', class extends enableShadowRoots(autoUnsubs
         const form = this.shadowRoot.querySelector('form')
         const submit = this.shadowRoot.querySelector('[type="submit"]')
 
-        form.addEventListener('input', enableSubmitOnValidInput(submit))
+        form.addEventListener('input', enableSubmitOnValidInput)
 
         form.addEventListener('submit', e => {
             e.preventDefault()
@@ -140,6 +142,44 @@ customElements.define('list-builder', class extends enableShadowRoots(autoUnsubs
             this.dispatchEvent(new CustomEvent('change', {detail: this.#value, bubbles: true, composed: true}))
             e.currentTarget.reset()
             submit.toggleAttribute('disabled', !e.currentTarget.checkValidity())
+        })
+    }
+})
+
+const toHtmlDocument = async (response) => {
+    const text = await response.text()
+    const parser = new DOMParser()
+    return parser.parseFromString(text, 'text/html')
+}
+
+customElements.define('flip-card-importer', class extends autoUnsubscribe(HTMLElement) {
+    constructor() {
+        super()
+        const shadow = this.attachShadow({mode: 'open'})
+        shadow.innerHTML = `
+            <form>
+                <label for="import">URL</label>
+                <input id="import" name="import" value="" required />
+                <input type="submit" value="Import" disabled/>
+            </form>
+        `
+    }
+    
+    connectedCallback() {
+        if (!this.shadowRoot) return
+        const form = this.shadowRoot.querySelector('form')
+        form.addEventListener('input', enableSubmitOnValidInput)
+        form.addEventListener('submit', e => {
+            e.preventDefault()
+            const formData = new FormData(e.currentTarget)
+            const url = formData.get('import').toString()
+            fetch(url)
+                .then(toHtmlDocument)
+                .then(doc => doc.body.querySelectorAll('flip-card'))
+                .then(cards => document.body.querySelector('flip-deck')?.append(...cards))
+        })
+        form.addEventListener('submit', e => {
+            e.currentTarget.reset()
         })
     }
 })
@@ -153,7 +193,6 @@ customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLEle
         const shadow = this.attachShadow({mode: 'open'})
         shadow.innerHTML = `
             <form>
-                <h1>Card Builder</h1>
                 <fieldset class="tags">
                   <legend>Tags</legend>
                   <ul></ul>

@@ -177,6 +177,11 @@ customElements.define('flip-card-importer', class extends autoUnsubscribe(HTMLEl
                 .then(toHtmlDocument)
                 .then(doc => doc.body.querySelectorAll('flip-card'))
                 .then(cards => document.body.querySelector('flip-deck')?.append(...cards))
+                .then(() => {
+                    // TODO: There's probably a better way to do this, but trying to trigger connectedCallback of the deck
+                    const deck = document.body.querySelector('flip-deck')
+                    deck.parentElement.insertBefore(deck, deck.nextSibling);
+                })
         })
         form.addEventListener('submit', e => {
             e.currentTarget.reset()

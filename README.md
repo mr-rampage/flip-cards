@@ -1,0 +1,7 @@
+- No dependencies
+- No tests (... for now) re: lazy
+- No documentation
+- Offline support
+- Camera support
+- Canvas support
+- Audio support

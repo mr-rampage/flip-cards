@@ -1,3 +1,6 @@
+/**
+ * @typedef { HTMLElement & { connectedCallback: () => void; disconnectedCallback: () => void }} CustomElement
+ */
 function* cycleByTagName(root, tagName) {
     const elements = root.getElementsByTagName(tagName)
     for (const element of elements) {
@@ -27,23 +30,24 @@ const toggleNext = (root, cycler) => {
 
 /**
  * Mixin that auto-unsubscribes to event listeners when component is removed from the DOM
- * @param {{prototype: HTMLElement; new(): HTMLElement}} base
- * @returns {{prototype: HTMLElement; new(): HTMLElement}}
+ * @param {{prototype: HTMLElement; new(): HTMLElement }} base
+ * @returns {{prototype: CustomElement; new(): CustomElement }}
  */
 const autoUnsubscribe = (base) => class extends base {
     #unsubscribe = []
 
     constructor() {
-        super();
+        super()
         const original = this.addEventListener
 
         this.addEventListener = (type, listener, options) => {
-            original.call(this, type, listener, options);
+            original.call(this, type, listener, options)
             this.#unsubscribe.push(() => this.removeEventListener(type, listener))
         }
     }
 
     disconnectedCallback() {
+        super.disconnectedCallback?.()
         while (this.#unsubscribe.length) {
             this.#unsubscribe.shift().call()
         }
@@ -52,17 +56,17 @@ const autoUnsubscribe = (base) => class extends base {
 
 /**
  *
- * @param {{prototype: HTMLElement; new(): HTMLElement}} base
- * @returns {{prototype: HTMLElement; new(): HTMLElement}}
+ * @param {{prototype: HTMLElement; new(): HTMLElement }} base
+ * @returns {{prototype: CustomElement; new(): CustomElement }}
  */
 const enableShadowRoots = base => class extends base {
     constructor() {
         super()
 
         const patchDeclarativeTemplate = template => {
-            const mode = template.getAttribute("shadowrootmode");
-            const shadowRoot = this.attachShadow({mode});
-            shadowRoot.appendChild(template.content);
+            const mode = template.getAttribute("shadowrootmode")
+            const shadowRoot = this.attachShadow({mode})
+            shadowRoot.appendChild(template.content)
             template.remove()
         }
 

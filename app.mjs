@@ -2,7 +2,7 @@
 const deck = document.body.querySelector('flip-deck')
 
 if (cardBuilder) {
-    const addCardToDeck = (deck) => ({ detail: cardTemplate }) => {
+    const addCardToDeck = (deck) => ({detail: cardTemplate}) => {
         if (!(cardTemplate instanceof HTMLTemplateElement)) return
         const card = cardTemplate.content.cloneNode(true)
         deck.append(card)

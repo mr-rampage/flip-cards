@@ -12,14 +12,6 @@ function* cycleByAttribute(root, attribute, values) {
     }
 }
 
-function* makeCycle(items) {
-    let index = 0
-    while (index < items.length) {
-        yield items[index]
-        index++
-    }
-}
-
 const hideAll = (root) => Array.from(root.children)
     .forEach(child => child.style.display = "none")
 
@@ -66,14 +58,14 @@ const autoUnsubscribe = (base) => class extends base {
 const enableShadowRoots = base => class extends base {
     constructor() {
         super()
-        
+
         const patchDeclarativeTemplate = template => {
             const mode = template.getAttribute("shadowrootmode");
             const shadowRoot = this.attachShadow({mode});
             shadowRoot.appendChild(template.content);
             template.remove()
         }
-        
+
         this.querySelectorAll("template[shadowrootmode]").forEach(patchDeclarativeTemplate)
     }
 }
@@ -83,7 +75,7 @@ function respondDataset(element) {
 }
 
 function requestDataset(element, name) {
-    let request = new CustomEvent('request-dataset', {detail: { name, value: null }, bubbles: true, composed: true})
+    let request = new CustomEvent('request-dataset', {detail: {name, value: null}, bubbles: true, composed: true})
     element.dispatchEvent(request)
     return request.detail.value
 }
@@ -116,7 +108,7 @@ customElements.define('flip-card', class extends autoUnsubscribe(HTMLElement) {
 customElements.define('flip-definition', class extends HTMLElement {
 })
 
-const enableSubmitOnValidInput = submit => e => 
+const enableSubmitOnValidInput = submit => e =>
     submit.toggleAttribute('disabled', !e.currentTarget.checkValidity())
 
 const toJson = formData =>

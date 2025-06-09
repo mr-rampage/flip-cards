@@ -1,4 +1,10 @@
-﻿const cardBuilder = document.body.querySelector('flip-card-builder')
+﻿// Check if site's storage has been marked as persistent
+if (navigator.storage && navigator.storage.persist) {
+    const isPersisted = await navigator.storage.persisted();
+    console.log(`Persisted storage granted: ${isPersisted}`);
+}
+
+const cardBuilder = document.body.querySelector('flip-card-builder')
 const deck = document.body.querySelector('flip-deck')
 
 if (cardBuilder) {

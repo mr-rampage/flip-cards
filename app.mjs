@@ -1,7 +1,12 @@
-﻿// Check if site's storage has been marked as persistent
-if (navigator.storage && navigator.storage.persist) {
-    const isPersisted = await navigator.storage.persisted();
-    console.log(`Persisted storage granted: ${isPersisted}`);
+﻿const navigator = globalThis.navigator;
+if (navigator.storage?.persist) {
+    navigator.storage.persist().then((persistent) => {
+        if (persistent) {
+            console.log("Storage will not be cleared except by explicit user action");
+        } else {
+            console.log("Storage may be cleared by the UA under storage pressure.");
+        }
+    });
 }
 
 const cardBuilder = document.body.querySelector('flip-card-builder')

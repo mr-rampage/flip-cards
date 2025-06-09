@@ -8,10 +8,11 @@ function* cycleByTagName(root, tagName) {
     }
 }
 
-function* cycleByAttribute(root, attribute, values) {
-    for (const value of values) {
-        const element = root.querySelector(`[${attribute}="${value}"]`)
-        if (element) yield element
+function* filter(iterator, predicate) {
+    for (const element of iterator) {
+        if (predicate(element)) {
+            yield element
+        }
     }
 }
 
@@ -84,14 +85,16 @@ function requestDataset(element, name) {
     return request.detail.value
 }
 
-const requestDeckCycle = (element) => requestDataset(element, 'cycle').split(',').map(item => item.trim())
+const requestDeckCycle = (element) => requestDataset(element, 'definitions').split(',').map(item => item.trim())
 
 const handleEventByTagName = (tagName, f) => (e) =>
     e.target.tagName.toLowerCase() === tagName && f(e)
 
 customElements.define('flip-deck', class extends autoUnsubscribe(HTMLElement) {
     connectedCallback() {
-        const cycle = cycleByTagName(this, 'flip-card')
+        const tags = this.dataset.tags.split(',').map(item => item.trim())
+        const byTags = card => tags.some(tag => card.dataset.tags.toLowerCase().includes(tag.toLowerCase()))
+        const cycle = filter(cycleByTagName(this, 'flip-card'), byTags)
         toggleNext(this, cycle)
         this.addEventListener('done', handleEventByTagName('flip-card', () => toggleNext(this, cycle)))
         respondDataset(this, 'cycle')
@@ -103,9 +106,10 @@ customElements.define('flip-card', class extends autoUnsubscribe(HTMLElement) {
     connectedCallback() {
         super.connectedCallback?.()
         const definitionTypes = requestDeckCycle(this)
-        const cycle = cycleByAttribute(this, 'data-type', definitionTypes)
-        toggleNext(this, cycle)
-        this.addEventListener('click', handleEventByTagName('flip-definition', () => toggleNext(this, cycle)))
+        let byDefinitionType = definition => definitionTypes.includes(definition.dataset.type);
+        const definitions = filter(cycleByTagName(this, 'flip-definition'), byDefinitionType)
+        toggleNext(this, definitions)
+        this.addEventListener('click', handleEventByTagName('flip-definition', () => toggleNext(this, definitions)))
     }
 })
 

@@ -2,7 +2,7 @@
 import {createElementFromString} from "./dom-utils.mjs";
 
 function cloneDefinitions(card, types) {
-    const selector = createElementFromString('<input type="radio" name="selected-card" />')
+    const selector = createElementFromString('<input type="radio" name="displayed-definition" />')
 
     return Array.from(card.querySelectorAll(types))
         .map(definition => definition.cloneNode(true))
@@ -57,11 +57,11 @@ customElements.define('flip-deck', class extends autoUnsubscribe(HTMLElement) {
                 display: none;
                 user-select: none;
                 
-                &:has([type="radio"]:checked) {
+                &:has([name="displayed-definition"]:checked) {
                     display: block;
                 }
                 
-                [type="radio"] {
+                [name="displayed-definition"] {
                     display: none;
                     
                     + flip-definition {

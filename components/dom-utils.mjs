@@ -1,32 +1,8 @@
-﻿export { toggleNext, cycleByTagName, filter, toHtmlDocument, enableSubmitOnValidInput, toJson, handleEventByTagName, respondDataset, requestDataset }
-
-function* cycleByTagName(root, tagName) {
-    const elements = root.getElementsByTagName(tagName)
-    for (const element of elements) {
-        yield element
-    }
-}
-
-function* filter(iterator, predicate) {
-    for (const element of iterator) {
-        if (predicate(element)) {
-            yield element
-        }
-    }
-}
-
-function hideAll(root) {
-    return Array.from(root.children).forEach(child => child.style.display = "none")
-}
-
-function toggleNext(root, cycler) {
-    hideAll(root)
-    const next = cycler.next()
-    if (next.done) {
-        root.dispatchEvent(new CustomEvent('done', {bubbles: true, composed: true}))
-    } else {
-        next.value.style.display = 'block'
-    }
+﻿export {
+    toHtmlDocument,
+    enableSubmitOnValidInput,
+    toJson,
+    createElementFromString
 }
 
 const toHtmlDocument = async (response) => {
@@ -43,15 +19,8 @@ const enableSubmitOnValidInput = e => {
 const toJson = formData =>
     Array.from(formData.entries()).reduce((json, [key, value]) => ({...json, [key]: value.trim()}), {})
 
-const handleEventByTagName = (tagName, f) => (e) =>
-    e.target.tagName.toLowerCase() === tagName && f(e)
-
-function respondDataset(element) {
-    element.addEventListener('request-dataset', e => e.detail.value = element.dataset[e.detail.name])
-}
-
-function requestDataset(element, name) {
-    let request = new CustomEvent('request-dataset', {detail: {name, value: null}, bubbles: true, composed: true})
-    element.dispatchEvent(request)
-    return request.detail.value
+function createElementFromString(htmlString) {
+    const template = document.createElement('template')
+    template.innerHTML = htmlString
+    return template.content.cloneNode(true)
 }

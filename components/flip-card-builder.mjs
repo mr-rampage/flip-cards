@@ -80,7 +80,7 @@ customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLEle
 
     get card() {
         return `
-            <flip-card data-tags="${this.#tags.map(this.#renderTag).join(',')}">
+            <flip-card data-tags="${this.#tags.map(this.#renderTag).join(' ')}">
                 ${this.#definitions.map(this.#renderDefinition).join('\n')}
             </flip-card>
         `.trim()

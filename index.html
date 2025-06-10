@@ -10,10 +10,17 @@
         *:not(:defined) {
             display: none;
         }
+        
+        flip-deck {
+            &::part(card) {
+                border: 1px solid gray;
+                border-radius: 1em;
+            }
 
-        flip-deck::part(definition) {
-            font-size: 50vh;
-            text-align: center;
+            &::part(definition) {
+                font-size: 50vh;
+                text-align: center;
+            }
         }
     </style>
 </head>

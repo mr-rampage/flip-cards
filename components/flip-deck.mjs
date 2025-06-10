@@ -1,69 +1,116 @@
 ﻿import {autoUnsubscribe} from "./mixins.mjs";
 import {createElementFromString} from "./dom-utils.mjs";
 
-function createDefinitionsByType(cards, types) {
+function cloneDefinitions(card, types) {
     const selector = createElementFromString('<input type="radio" name="selected-card" />')
 
-    return cards
-        .flatMap(card => Array.from(card.querySelectorAll(types)))
-        .map(definition => {
-            const clone = definition.cloneNode(true)
-            clone.setAttribute('part', 'definition')
-            return clone
-        })
+    return Array.from(card.querySelectorAll(types))
+        .map(definition => definition.cloneNode(true))
         .flatMap(clone => [selector.cloneNode(true), clone])
 }
 
+function getCardSelector(tags) {
+    return tags
+        .split(' ')
+        .map(tag => `flip-card[data-tags~="${tag.trim()}"]`).join(',');
+}
+
+function getDefinitionSelector(definitions) {
+    return definitions
+        .split(' ')
+        .map(definition => `flip-definition[data-type="${definition.trim()}"]`).join(',')
+}
+
+function cloneCards(deck) {
+    const tags = getCardSelector(deck.dataset.tags ?? "")
+    const types = getDefinitionSelector(deck.dataset.definitions ?? "")
+
+    return Array.from(deck.querySelectorAll(tags))
+        .map(card => {
+            const clone = card.cloneNode(false)
+            const definitions = cloneDefinitions(card, types)
+            clone.append(...definitions)
+            return clone
+        })
+        .filter(card => card.children.length > 0)
+}
+
+function findNextCardSelector(card) {
+    const nextCard = card.nextElementSibling
+    return nextCard?.querySelector('[type="radio"]')
+}
+
+function findNextSelector(root) {
+    const currentDefinition = root.querySelector('[type="radio"]:checked')
+    const nextSelector = currentDefinition.nextElementSibling.nextElementSibling
+    return nextSelector ?? findNextCardSelector(currentDefinition.closest('flip-card'))
+}
+
 customElements.define('flip-deck', class extends autoUnsubscribe(HTMLElement) {
-    
+
     constructor() {
         super()
-        const shadowRoot = this.attachShadow({ mode: 'open' })
+        const shadowRoot = this.attachShadow({mode: 'open'})
         shadowRoot.innerHTML = `
         <style>
-            [type="radio"] {
+            flip-card {
                 display: none;
+                user-select: none;
                 
-                + flip-definition {
-                    display: none;
+                &:has([type="radio"]:checked) {
+                    display: block;
                 }
                 
-                &:checked + flip-definition {
-                    display: block;
-                    user-select: none;
+                [type="radio"] {
+                    display: none;
+                    
+                    + flip-definition {
+                        display: none;
+                    }
+                    
+                    &:checked + flip-definition {
+                        display: block;
+                    }
                 }
             }
         </style>
         `
     }
-    
+
     connectedCallback() {
-        const tags = this.dataset.tags.split(' ').map(tag => `flip-card[data-tags~="${tag.trim()}"]`).join(',');
-        const types= this.dataset.definitions.split(' ').map(definition => `flip-definition[data-type="${definition.trim()}"]`).join(',')
-        const cards = Array.from(document.querySelectorAll(tags))
-        const definitions = createDefinitionsByType(cards, types)
-        this.shadowRoot.append(...definitions)
-        
+        this.shadowRoot
+            .append(...(cloneCards(this)))
+
+        this.shadowRoot
+            .querySelectorAll('flip-card')
+            .forEach(card => card.setAttribute('part', 'card'))
+
+        this.shadowRoot
+            .querySelectorAll('flip-definition')
+            .forEach(card => card.setAttribute('part', 'definition'))
+
         this.addEventListener('click', () => {
-            const selected = this.shadowRoot.querySelector(':checked')
-            const next = selected.nextElementSibling.nextElementSibling
-            if (next)
+            const next = findNextSelector(this.shadowRoot)
+            if (next) {
                 next.checked = true
-            else {
+            } else {
                 console.info('done!')
                 this.#reset()
             }
         })
-        
-        const firstCard = this.shadowRoot.querySelector('[type="radio"]')
-        if (firstCard)
-            firstCard.checked = true
+
+        const firstCard = this.shadowRoot
+            .querySelector('[type="radio"]')
+        if (firstCard) firstCard.checked = true
     }
-    
+
     #reset() {
-        this.shadowRoot.querySelectorAll('[name="selected-card"], [part="definition"]')
+        this.shadowRoot
+            .querySelectorAll('flip-card')
             .forEach(element => element.remove())
-        this.parentElement.insertBefore(this, this.nextSibling);
+
+        this.parentElement
+            .insertBefore(this, this.nextSibling);
     }
 })
 

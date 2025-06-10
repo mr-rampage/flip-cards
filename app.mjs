@@ -1,4 +1,6 @@
-﻿const navigator = globalThis.navigator;
+﻿import "./components/index.mjs"
+
+const navigator = globalThis.navigator;
 if (navigator.storage?.persist) {
     navigator.storage.persist().then((persistent) => {
         if (persistent) {

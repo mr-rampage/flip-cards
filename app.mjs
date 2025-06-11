@@ -11,9 +11,9 @@ if ('serviceWorker' in navigator) {
     try {
         // Capture the registration for later use, if needed
         const reg = await navigator.serviceWorker.register('/service-worker.js');
-        document.body.querySelector('#status-offline').textContent += '✔️'
+        document.body.querySelector('#status-offline').textContent += '😎'
     } catch (err) {
-        document.body.querySelector('#status-offline').textContent += '❌'
+        document.body.querySelector('#status-offline').textContent += '😵'
     }
 }
 
@@ -21,9 +21,9 @@ if ('serviceWorker' in navigator) {
 if (navigator.storage?.persist) {
     navigator.storage.persist().then((persistent) => {
         if (persistent) {
-            document.body.querySelector('#status-persistence').textContent += '✔️'
+            document.body.querySelector('#status-persistence').textContent += '😎'
         } else {
-            document.body.querySelector('#status-persistence').textContent += '❌'
+            document.body.querySelector('#status-persistence').textContent += '😵'
         }
     });
 }

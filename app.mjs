@@ -1,4 +1,7 @@
 ﻿import "./components/index.mjs"
+import {importCards} from "./components/flip-card-importer.mjs";
+import {addCardToDeck} from "./components/flip-card-builder.mjs";
+import {reviewDeck} from "./components/flip-deck-builder.mjs";
 
 const navigator = globalThis.navigator;
 if (navigator.storage?.persist) {
@@ -11,15 +14,8 @@ if (navigator.storage?.persist) {
     });
 }
 
-const cardBuilder = document.body.querySelector('flip-card-builder')
 const deck = document.body.querySelector('flip-deck')
 
-if (cardBuilder) {
-    const addCardToDeck = (deck) => ({detail: cardTemplate}) => {
-        if (!(cardTemplate instanceof HTMLTemplateElement)) return
-        const card = cardTemplate.content.cloneNode(true)
-        deck.append(card)
-    }
-
-    cardBuilder.addEventListener('input', addCardToDeck(deck))
-}
+addCardToDeck(deck)
+importCards(deck)
+reviewDeck(deck)

@@ -1,6 +1,18 @@
 ﻿import {autoUnsubscribe} from "./mixins.mjs";
 import "./list-builder.mjs"
 
+export {addCardToDeck}
+
+const ADD_CARD_EVENT = "add-card"
+
+function addCardToDeck(deck) {
+    if (deck.tagName.toLowerCase() !== "flip-deck") return
+    document.body.addEventListener(ADD_CARD_EVENT, ({target, detail: card}) => {
+        if (target.tagName.toLowerCase() !== "flip-card-builder") return
+        deck.append(card)
+    })
+}
+
 customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLElement) {
     #tags = []
     #definitions = []
@@ -71,8 +83,16 @@ customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLEle
                 e.preventDefault()
                 if (this.#tags.length && this.#definitions.length) {
                     const template = document.createElement('template')
-                    template.innerHTML = this.card
-                    this.dispatchEvent(new CustomEvent('input', {detail: template, bubbles: true, composed: true}))
+                    template.innerHTML = `
+                        <flip-card data-tags="${this.#tags.map(({tag}) => tag).join(" ")}">
+                            ${this.#definitions.map(({type, definition}) =>
+                        `<flip-definition data-type="${type}">
+                            ${definition}
+                         </flip-definition>`)}
+                        </flip-card>
+                    `.trim()
+                    const detail = template.content.cloneNode(true)
+                    this.dispatchEvent(new CustomEvent(ADD_CARD_EVENT, {detail, bubbles: true, composed: true}))
                     this.#reset()
                 }
             })
@@ -99,7 +119,7 @@ customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLEle
         if (!list) return
         list.innerHTML = results.map(toListItem).join('')
     }
-    
+
     #reset() {
         this.#tags = []
         this.#definitions = []

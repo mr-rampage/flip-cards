@@ -1,7 +1,7 @@
 ﻿export {
     toHtmlDocument,
     enableSubmitOnValidInput,
-    toJson,
+    toKeyValue,
     createElementFromString
 }
 
@@ -15,9 +15,10 @@ const enableSubmitOnValidInput = e => {
     const submit = e.currentTarget.querySelector('[type="submit"]')
     submit.toggleAttribute('disabled', !e.currentTarget.checkValidity())
 }
-
-const toJson = formData =>
-    Array.from(formData.entries()).reduce((json, [key, value]) => ({...json, [key]: value.trim()}), {})
+const toKeyValue = formData =>
+    Array.from(formData.keys())
+        .map(key => [key, formData.get(key)])
+        .reduce((acc, [key, values]) => ({...acc, [key]: values}), {})
 
 function createElementFromString(htmlString) {
     const template = document.createElement('template')

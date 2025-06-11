@@ -94,23 +94,14 @@ customElements.define('flip-deck', class extends autoUnsubscribe(HTMLElement) {
             if (next) {
                 next.checked = true
             } else {
-                console.info('done!')
-                this.#reset()
+                console.info("done!")
+                this.remove()
             }
         })
 
         const firstCard = this.shadowRoot
             .querySelector('[type="radio"]')
         if (firstCard) firstCard.checked = true
-    }
-
-    #reset() {
-        this.shadowRoot
-            .querySelectorAll('flip-card')
-            .forEach(element => element.remove())
-
-        this.parentElement
-            .insertBefore(this, this.nextSibling);
     }
 })
 

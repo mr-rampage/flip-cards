@@ -1,5 +1,5 @@
 ﻿import {autoUnsubscribe, enableShadowRoots} from "./mixins.mjs";
-import {enableSubmitOnValidInput, toJson} from "./dom-utils.mjs";
+import {enableSubmitOnValidInput, toKeyValue} from "./dom-utils.mjs";
 
 customElements.define('list-builder', class extends enableShadowRoots(autoUnsubscribe(HTMLElement)) {
 
@@ -14,7 +14,7 @@ customElements.define('list-builder', class extends enableShadowRoots(autoUnsubs
         form.addEventListener('submit', e => {
             e.preventDefault()
             const formData = new FormData(e.target)
-            this.dispatchEvent(new CustomEvent('change', {detail: toJson(formData), bubbles: true, composed: true}))
+            this.dispatchEvent(new CustomEvent('change', {detail: toKeyValue(formData), bubbles: true, composed: true}))
             e.currentTarget.reset()
             submit.toggleAttribute('disabled', !e.currentTarget.checkValidity())
         })

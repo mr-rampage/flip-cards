@@ -16,6 +16,10 @@ if (navigator.storage?.persist) {
 
 const deck = document.body.querySelector('flip-deck')
 
+const observer = new MutationObserver(() => localStorage.setItem("deck", deck.innerHTML))
+observer.observe(deck, {childList: true, subtree: true})
+deck.innerHTML = localStorage.getItem("deck") ?? ""
+
 addCardToDeck(deck)
 importCards(deck)
 reviewDeck(deck)

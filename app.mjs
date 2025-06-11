@@ -10,7 +10,7 @@ if ('serviceWorker' in navigator) {
     // Try to register the service worker.
     try {
         // Capture the registration for later use, if needed
-        const reg = await navigator.serviceWorker.register('/service-worker.js');
+        const reg = await navigator.serviceWorker.register('./service-worker.js');
         document.body.querySelector('#status-offline').textContent += '😎'
     } catch (err) {
         document.body.querySelector('#status-offline').textContent += '😵'

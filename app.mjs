@@ -4,6 +4,20 @@ import {addCardToDeck} from "./components/flip-card-builder.mjs";
 import {reviewDeck} from "./components/flip-deck-builder.mjs";
 
 const navigator = globalThis.navigator;
+
+// Register the service worker
+if ('serviceWorker' in navigator) {
+    // Try to register the service worker.
+    try {
+        // Capture the registration for later use, if needed
+        const reg = await navigator.serviceWorker.register('/service-worker.js');
+        console.log('Service worker registered! 😎', reg);
+    } catch (err) {
+        console.log('😥 Service worker registration failed: ', err);
+    }
+}
+
+
 if (navigator.storage?.persist) {
     navigator.storage.persist().then((persistent) => {
         if (persistent) {

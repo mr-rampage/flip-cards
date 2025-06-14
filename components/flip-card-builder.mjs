@@ -1,5 +1,6 @@
 ﻿import {autoUnsubscribe} from "./mixins.mjs";
-import "./list-builder.mjs"
+import "./input-definition.mjs"
+import "./input-tag.mjs"
 
 export {addCardToDeck}
 
@@ -13,10 +14,15 @@ function addCardToDeck(deck) {
     })
 }
 
-customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLElement) {
-    #tags = []
-    #definitions = []
+const inPlacePairwise = (xs, x, idx) => {
+    if (idx % 2 === 0) 
+        xs.push([x]) 
+    else 
+        xs.at(-1).push(x)
+    return xs
+}
 
+customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLElement) {
     constructor() {
         super()
         const shadow = this.attachShadow({mode: 'open'})
@@ -24,33 +30,13 @@ customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLEle
             <form>
                 <fieldset class="tags">
                   <legend>Tags</legend>
-                  <ul></ul>
-                  <list-builder>
-                    <template shadowrootmode="open">
-                        <form>
-                            <label for="tag">Tag</label>
-                            <input type="text" id="tag" name="tag" required/>
-                            <input type="submit" value="Add tag" disabled/>
-                        </form>
-                    </template>
-                  </list-builder>
+                  <input-tag></input-tag>
                 </fieldset>
                 <fieldset class="definitions">
                   <legend>Definitions</legend>
-                  <ul></ul>
-                  <list-builder>
-                    <template shadowrootmode="open">
-                        <form>
-                            <label for="type">Type</label>
-                            <input type="text" id="type" name="type" required/>
-                            <label for="definition">Definition</label>
-                            <textarea id="definition" name="definition" required></textarea>
-                            <input type="submit" value="Add definition" disabled/>
-                        </form>
-                    </template>
-                  </list-builder>
+                  <input-definition></input-definition>
                 </fieldset>
-                <input type="submit" value="Create card" />
+                <input type="submit" value="Create card" disabled />
             </form>
         `
     }
@@ -58,71 +44,28 @@ customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLEle
     connectedCallback() {
         super.connectedCallback?.()
 
-        const listBuilderEvent = f => e => {
-            if (e.target.tagName.toLowerCase() !== 'list-builder') return
-            f(e)
-        }
+        this.shadowRoot.addEventListener('submit', e => e.preventDefault())
+        this.shadowRoot.addEventListener('submit', () => {
+            const tags = Array
+                .from(inputTag.querySelectorAll('li'))
+                .map(li => li.textContent)
+                .join(' ')
 
-        this.shadowRoot
-            .querySelector('fieldset.tags')
-            .addEventListener('change', listBuilderEvent(e => {
-                this.#tags.push(e.detail)
-                this.#updateItems(e.currentTarget, result => `<li>${result.tag}</li>`, this.#tags)
+            const definitions = Array
+                .from(inputDefinitions.querySelectorAll('dt, dd'))
+                .map(element => element.innerHTML)
+                .reduce(inPlacePairwise, [])
+                .map(([type, definition]) => `<flip-definition data-type="${type}">${definition}</flip-definition>`)
+                .join('\n')
+
+            const card = `<flip-card data-tags="${tags}">${definitions}</flip-card>`
+
+            const template = document.createElement("template")
+            template.innerHTML = card
+
+            this.dispatchEvent(new CustomEvent(ADD_CARD_EVENT, {
+                detail: template.content.cloneNode(true), bubbles: true, composed: true
             }))
-
-        this.shadowRoot
-            .querySelector('fieldset.definitions')
-            .addEventListener('change', listBuilderEvent(e => {
-                this.#definitions.push(e.detail)
-                this.#updateItems(e.currentTarget, result => `<li>${result.type},${result.definition}</li>`, this.#definitions)
-            }))
-
-        this.shadowRoot
-            .querySelector('form')
-            .addEventListener('submit', e => {
-                e.preventDefault()
-                if (this.#tags.length && this.#definitions.length) {
-                    const template = document.createElement('template')
-                    template.innerHTML = `
-                        <flip-card data-tags="${this.#tags.map(({tag}) => tag).join(" ")}">
-                            ${this.#definitions.map(({type, definition}) =>
-                        `<flip-definition data-type="${type}">
-                            ${definition}
-                         </flip-definition>`)}
-                        </flip-card>
-                    `.trim()
-                    const detail = template.content.cloneNode(true)
-                    this.dispatchEvent(new CustomEvent(ADD_CARD_EVENT, {detail, bubbles: true, composed: true}))
-                    this.#reset()
-                }
-            })
-    }
-
-    get card() {
-        return `
-            <flip-card data-tags="${this.#tags.map(this.#renderTag).join(' ')}">
-                ${this.#definitions.map(this.#renderDefinition).join('\n')}
-            </flip-card>
-        `.trim()
-    }
-
-    #renderTag({tag}) {
-        return tag
-    }
-
-    #renderDefinition({type, definition}) {
-        return `<flip-definition data-type="${type}">${definition}</flip-definition>`
-    }
-
-    #updateItems(fieldSet, toListItem, results) {
-        const list = fieldSet.querySelector('ul')
-        if (!list) return
-        list.innerHTML = results.map(toListItem).join('')
-    }
-
-    #reset() {
-        this.#tags = []
-        this.#definitions = []
-        this.shadowRoot.querySelectorAll('ul').forEach(list => list.replaceChildren())
+        })
     }
 })

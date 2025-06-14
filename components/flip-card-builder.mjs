@@ -44,6 +44,9 @@ customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLEle
     connectedCallback() {
         super.connectedCallback?.()
 
+        let inputTag = this.shadowRoot.querySelector('input-tag')
+        let inputDefinitions = this.shadowRoot.querySelector('input-definition')
+
         this.shadowRoot.addEventListener('submit', e => e.preventDefault())
         this.shadowRoot.addEventListener('submit', () => {
             const tags = Array

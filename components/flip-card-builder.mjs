@@ -36,7 +36,7 @@ customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLEle
                   <legend>Definitions</legend>
                   <input-definition></input-definition>
                 </fieldset>
-                <input type="submit" value="Create card" disabled />
+                <input type="submit" value="Create card" />
             </form>
         `
     }

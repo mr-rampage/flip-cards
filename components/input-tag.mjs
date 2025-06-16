@@ -23,6 +23,8 @@ customElements.define('input-tag', class extends autoUnsubscribe(HTMLElement) {
 
         const form = shadowRoot.querySelector('form')
         
+        form.addEventListener('click', e => form.submit())
+        
         const tags = new Set()
         form.addEventListener('submit', e => {
             e.preventDefault()

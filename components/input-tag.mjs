@@ -21,21 +21,16 @@ customElements.define('input-tag', class extends autoUnsubscribe(HTMLElement) {
             <input type="submit" value="Add Tag" />
         </form>`
 
-        shadowRoot.addEventListener('input', e => e.stopImmediatePropagation())
-
         const form = shadowRoot.querySelector('form')
         
-        form.addEventListener('submit', e => e.preventDefault())
-
-        
         const tags = new Set()
-        form.addEventListener('submit', () => {
+        form.addEventListener('submit', e => {
+            e.preventDefault()
             const formData = new FormData(form)
             tags.add(formData.get('tag'))
             list.innerHTML = render(tags)
+            form.reset()
         })
-        
-        form.addEventListener('submit', () => form.reset())
     }
     
 })

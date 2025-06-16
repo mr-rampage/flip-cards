@@ -36,16 +36,14 @@ customElements.define('input-definition', class extends autoUnsubscribe(HTMLElem
         
         const form = shadowRoot.querySelector('form')
         
-        form.addEventListener('submit', e => e.preventDefault())
-
         const definitions = new Map()
-        form.addEventListener('submit', () => {
+        form.addEventListener('submit', e => {
+            e.preventDefault()
             const formData = new FormData(form)
             definitions.set(formData.get('type'), formData.get('definition'))
             list.innerHTML = render(definitions)
+            form.reset()
         })
-
-        form.addEventListener('submit', () => form.reset())
     }
 
 })

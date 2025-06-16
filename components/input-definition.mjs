@@ -14,7 +14,7 @@ customElements.define('input-definition', class extends autoUnsubscribe(HTMLElem
         const list = document.createElement('dl')
         this.replaceChildren(list)
         
-        const shadowRoot = this.attachShadow({ mode: 'closed' })
+        const shadowRoot = this.attachShadow({ mode: 'open' })
         shadowRoot.innerHTML = `
         <slot></slot>
         <form>

@@ -12,7 +12,7 @@ customElements.define('input-tag', class extends autoUnsubscribe(HTMLElement) {
         const list = document.createElement('ul')
         this.replaceChildren(list)
         
-        const shadowRoot = this.attachShadow({ mode: 'closed' })
+        const shadowRoot = this.attachShadow({ mode: 'open' })
         shadowRoot.innerHTML = `
         <slot></slot>
         <form>

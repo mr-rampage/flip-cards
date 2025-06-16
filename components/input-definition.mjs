@@ -1,20 +1,14 @@
 ﻿import {autoUnsubscribe} from "./mixins.mjs";
 
-function render(definitions) {
-    return definitions
-        .entries()
-        .map(([type, definition]) => `<dt>${type}</dt><dd>${definition}</dd>`)
-        .toArray()
-        .join('')
-}
 customElements.define('input-definition', class extends autoUnsubscribe(HTMLElement) {
+    static formAssociated = true;
+    #definitions = new Map()
+    #internals
+
     constructor() {
         super()
-        
-        const list = document.createElement('dl')
-        this.replaceChildren(list)
-        
-        const shadowRoot = this.attachShadow({ mode: 'open' })
+        this.#internals = this.attachInternals();
+        const shadowRoot = this.attachShadow({ mode: 'open', delegatesFocus: true })
         shadowRoot.innerHTML = `
         <slot></slot>
         <div>
@@ -24,29 +18,90 @@ customElements.define('input-definition', class extends autoUnsubscribe(HTMLElem
             <textarea id="definition" name="definition" required></textarea>
             <button>Add Definition</button>
         </div>`
+    }
+    
+    connectedCallback() {
+        super.connectedCallback?.()
 
-        shadowRoot.addEventListener('input', e => e.stopImmediatePropagation())
-        shadowRoot.addEventListener('change', e => e.stopImmediatePropagation())
-        
-        const addDefinition = shadowRoot.querySelector('button')
-        const type = shadowRoot.querySelector('#type')
-        const definition = shadowRoot.querySelector('#definition')
-        
-        const definitions = new Map()
+        this.shadowRoot.addEventListener('input', e => e.stopImmediatePropagation())
+
+        const addDefinition = this.shadowRoot.querySelector('button')
+        const type = this.shadowRoot.querySelector('#type')
+        const definition = this.shadowRoot.querySelector('#definition')
+
         addDefinition.addEventListener('click', e => {
-            if (!type.checkValidity()) {
-                type.reportValidity()
-                return
-            }
-            if (!definition.checkValidity()) {
-                definition.reportValidity()
-                return
-            }
-            definitions.set(type.value, definition.value)
-            list.innerHTML = render(definitions)
+            this.#set(type, definition)
             type.value = ''
             definition.value = ''
+            type.focus()
         })
     }
+    
+    #set(type, definition) {
+        if (!type.checkValidity()) {
+            this.#internals.setValidity(type.validity, type.validationMessage, type);
+            type.reportValidity()
+            return
+        }
+        if (!definition.checkValidity()) {
+            this.#internals.setValidity(definition.validity, definition.validationMessage, definition);
+            definition.reportValidity()
+            return
+        }
+        this.#definitions.set(type.value, definition.value)
+        type.value = ''
+        definition.value = ''
+        this.#internals.setFormValue(JSON.stringify(Array.from(this.#definitions)))
+        this.#internals.setValidity({})
+        this.#render(this.#definitions)
+    }
 
+    get value() {
+        return Array.from(this.#definitions)
+    }
+
+    get form() {
+        return this.#internals.form;
+    }
+
+    get name() {
+        return this.getAttribute('name');
+    }
+
+    get type() {
+        return this.localName;
+    }
+
+    checkValidity() {
+        if (this.#definitions.size === 0) {
+            this.#internals.setValidity({ valueMissing: true }, "Please define a definition for this card", this.shadowRoot.querySelector('#type'));
+        }
+        return this.#internals.checkValidity();
+    }
+
+    reportValidity() {
+        return this.#internals.reportValidity();
+    }
+
+    get validity() {
+        return this.#internals.validity;
+    }
+
+    get willValidate() {
+        return this.#internals.willValidate;
+    }
+
+    get validationMessage() {
+        return this.#internals.validationMessage;
+    }
+
+    #render(definitions) {
+        const dictionary = document.createElement("dd");
+        dictionary.innerHTML = definitions
+                .entries()
+                .map(([type, definition]) => `<dt>${type}</dt><dd>${definition}</dd>`)
+                .toArray()
+                .join('')
+        this.replaceChildren(dictionary)
+    }
 })

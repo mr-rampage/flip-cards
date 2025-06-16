@@ -15,14 +15,6 @@ function addCardToDeck(deck) {
     })
 }
 
-const inPlacePairwise = (xs, x, idx) => {
-    if (idx % 2 === 0) 
-        xs.push([x]) 
-    else 
-        xs.at(-1).push(x)
-    return xs
-}
-
 customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLElement) {
     constructor() {
         super()
@@ -31,11 +23,11 @@ customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLEle
             <form>
                 <fieldset class="tags">
                   <legend>Tags</legend>
-                  <input-tag></input-tag>
+                  <input-tag name="tags"></input-tag>
                 </fieldset>
                 <fieldset class="definitions">
                   <legend>Definitions</legend>
-                  <input-definition></input-definition>
+                  <input-definition name="definitions"></input-definition>
                 </fieldset>
                 <input type="submit" value="Create card" />
             </form>
@@ -50,19 +42,24 @@ customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLEle
 
         this.shadowRoot.addEventListener('submit', e => e.preventDefault())
         this.shadowRoot.addEventListener('submit', () => {
-            const tags = Array
-                .from(inputTag.querySelectorAll('li'))
-                .map(li => li.textContent)
-                .join(' ')
+            if (!inputTag.checkValidity())
+            {
+                inputTag.reportValidity()
+                return
+            }
+            
+            if (!inputDefinitions.checkValidity())
+            {
+                inputDefinitions.reportValidity()
+                return
+            }
+            
+            const tags = inputTag.value.join(' ')
 
-            const definitions = Array
-                .from(inputDefinitions.querySelectorAll('dt, dd'))
-                .map(element => element.innerHTML)
-                .reduce(inPlacePairwise, [])
+            const definitions = 
+                inputDefinitions.value
                 .map(([type, definition]) => `<flip-definition data-type="${type}">${definition}</flip-definition>`)
                 .join('\n')
-
-            if (tags === "" || definitions === "") return
 
             const card = createElementFromString(`<flip-card data-tags="${tags}">${definitions}</flip-card>`)
 

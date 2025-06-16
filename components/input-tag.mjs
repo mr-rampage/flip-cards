@@ -20,15 +20,21 @@ customElements.define('input-tag', class extends autoUnsubscribe(HTMLElement) {
             <input type="text" id="tag" name="tag" pattern="^\\S+$" title="A tag must be a word or hyphenated word" required/>
             <button>Add Tag</button>
         </div>`
+        
+        shadowRoot.addEventListener('input', e => e.stopImmediatePropagation())
 
         const tag = shadowRoot.querySelector('#tag')
         const addTag = shadowRoot.querySelector('button')
         
         const tags = new Set()
         addTag.addEventListener('click', e => {
-            tags.add(tag.value)
-            list.innerHTML = render(tags)
-            tag.value = ''
+            if (tag.checkValidity()) {
+                tags.add(tag.value)
+                list.innerHTML = render(tags)
+                tag.value = ''
+            } else {
+                tag.reportValidity()
+            }
         })
     }
     

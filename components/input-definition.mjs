@@ -17,32 +17,35 @@ customElements.define('input-definition', class extends autoUnsubscribe(HTMLElem
         const shadowRoot = this.attachShadow({ mode: 'open' })
         shadowRoot.innerHTML = `
         <slot></slot>
-        <form>
+        <div>
             <label for="type">Type</label>
             <input type="text" id="type" name="type" pattern="^\\S+$" title="A definition type must be a word or hyphenated word" required/>
-            <label for="render">Display as</label>
-            <select id="render" name="render" required>
-                <option value='html' selected>HTML</option>
-                <option value='text'>Text</option>
-                <option value='audio'>Audio</option>
-            </select>
             <label for="definition">Definition</label>
             <textarea id="definition" name="definition" required></textarea>
-            <input type="submit" value="Add Tag" />
-        </form>`
+            <button>Add Definition</button>
+        </div>`
 
         shadowRoot.addEventListener('input', e => e.stopImmediatePropagation())
         shadowRoot.addEventListener('change', e => e.stopImmediatePropagation())
         
-        const form = shadowRoot.querySelector('form')
+        const addDefinition = shadowRoot.querySelector('button')
+        const type = shadowRoot.querySelector('#type')
+        const definition = shadowRoot.querySelector('#definition')
         
         const definitions = new Map()
-        form.addEventListener('submit', e => {
-            e.preventDefault()
-            const formData = new FormData(form)
-            definitions.set(formData.get('type'), formData.get('definition'))
+        addDefinition.addEventListener('click', e => {
+            if (!type.checkValidity()) {
+                type.reportValidity()
+                return
+            }
+            if (!definition.checkValidity()) {
+                definition.reportValidity()
+                return
+            }
+            definitions.set(type.value, definition.value)
             list.innerHTML = render(definitions)
-            form.reset()
+            type.value = ''
+            definition.value = ''
         })
     }
 

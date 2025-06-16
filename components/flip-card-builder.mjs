@@ -28,7 +28,7 @@ customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLEle
         super()
         const shadow = this.attachShadow({mode: 'open'})
         shadow.innerHTML = `
-            <form>
+            <div>
                 <fieldset class="tags">
                   <legend>Tags</legend>
                   <input-tag></input-tag>
@@ -37,8 +37,8 @@ customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLEle
                   <legend>Definitions</legend>
                   <input-definition></input-definition>
                 </fieldset>
-                <input type="submit" value="Create card" />
-            </form>
+                <button>Create card</button>
+            </div>
         `
     }
 
@@ -47,9 +47,11 @@ customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLEle
 
         let inputTag = this.shadowRoot.querySelector('input-tag')
         let inputDefinitions = this.shadowRoot.querySelector('input-definition')
+        
+        let create = this.shadowRoot.querySelector('button')
 
-        this.shadowRoot.addEventListener('submit', e => e.preventDefault())
-        this.shadowRoot.addEventListener('submit', () => {
+        create.addEventListener('click', e => e.preventDefault())
+        create.addEventListener('click', () => {
             const tags = Array
                 .from(inputTag.querySelectorAll('li'))
                 .map(li => li.textContent)

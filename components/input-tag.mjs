@@ -68,6 +68,12 @@ customElements.define('input-tag', class extends autoUnsubscribe(HTMLElement) {
     get validationMessage() {
         return this.#internals.validationMessage;
     }
+    formResetCallback() {
+        this.#tags.clear()
+        this.#internals.setFormValue(null)
+        this.#internals.setValidity({})
+        this.replaceChildren()
+    }
 
     #add(input) {
         if (!input.checkValidity()) {

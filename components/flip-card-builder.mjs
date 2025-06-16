@@ -66,6 +66,8 @@ customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLEle
             this.dispatchEvent(new CustomEvent(ADD_CARD_EVENT, {
                 detail: card, bubbles: true, composed: true
             }))
+            
+            this.shadowRoot.querySelector('form').reset()
         })
     }
 })

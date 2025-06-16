@@ -94,6 +94,13 @@ customElements.define('input-definition', class extends autoUnsubscribe(HTMLElem
     get validationMessage() {
         return this.#internals.validationMessage;
     }
+    
+    formResetCallback() {
+        this.#definitions.clear()
+        this.#internals.setFormValue(null)
+        this.#internals.setValidity({})
+        this.replaceChildren()
+    }
 
     #render(definitions) {
         const dictionary = document.createElement("dd");

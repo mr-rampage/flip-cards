@@ -1,6 +1,7 @@
 ﻿import {autoUnsubscribe} from "./mixins.mjs";
 import "./input-definition.mjs"
 import "./input-tag.mjs"
+import {createElementFromString} from "./dom-utils.mjs";
 
 export {addCardToDeck}
 
@@ -61,13 +62,12 @@ customElements.define('flip-card-builder', class extends autoUnsubscribe(HTMLEle
                 .map(([type, definition]) => `<flip-definition data-type="${type}">${definition}</flip-definition>`)
                 .join('\n')
 
-            const card = `<flip-card data-tags="${tags}">${definitions}</flip-card>`
+            if (tags === "" || definitions === "") return
 
-            const template = document.createElement("template")
-            template.innerHTML = card
+            const card = createElementFromString(`<flip-card data-tags="${tags}">${definitions}</flip-card>`)
 
             this.dispatchEvent(new CustomEvent(ADD_CARD_EVENT, {
-                detail: template.content.cloneNode(true), bubbles: true, composed: true
+                detail: card, bubbles: true, composed: true
             }))
         })
     }

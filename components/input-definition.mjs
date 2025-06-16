@@ -1,5 +1,4 @@
 ﻿import {autoUnsubscribe} from "./mixins.mjs";
-import {disableSubmitOnFormChange} from "./dom-utils.mjs";
 
 function render(definitions) {
     return definitions
@@ -29,7 +28,7 @@ customElements.define('input-definition', class extends autoUnsubscribe(HTMLElem
             </select>
             <label for="definition">Definition</label>
             <textarea id="definition" name="definition" required></textarea>
-            <input type="submit" value="Add Tag" disabled/>
+            <input type="submit" value="Add Tag" />
         </form>`
 
         shadowRoot.addEventListener('input', e => e.stopImmediatePropagation())
@@ -37,7 +36,6 @@ customElements.define('input-definition', class extends autoUnsubscribe(HTMLElem
         
         const form = shadowRoot.querySelector('form')
         
-        disableSubmitOnFormChange(form)
         form.addEventListener('submit', e => e.preventDefault())
 
         const definitions = new Map()
@@ -47,10 +45,7 @@ customElements.define('input-definition', class extends autoUnsubscribe(HTMLElem
             list.innerHTML = render(definitions)
         })
 
-        form.addEventListener('submit', () => {
-            form.reset()
-            disableSubmitOnFormChange(form)
-        })
+        form.addEventListener('submit', () => form.reset())
     }
 
 })

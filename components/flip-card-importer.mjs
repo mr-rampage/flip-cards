@@ -1,5 +1,5 @@
 ﻿import {autoUnsubscribe} from "./mixins.mjs";
-import {toHtmlDocument, enableSubmitOnValidInput} from "./dom-utils.mjs";
+import {toHtmlDocument} from "./dom-utils.mjs";
 
 export {importCards}
 
@@ -21,7 +21,7 @@ customElements.define('flip-card-importer', class extends autoUnsubscribe(HTMLEl
             <form>
                 <label for="import">URL</label>
                 <input id="import" name="import" value="" required />
-                <input type="submit" value="Import" disabled/>
+                <input type="submit" value="Import" />
             </form>
         `
     }
@@ -29,7 +29,6 @@ customElements.define('flip-card-importer', class extends autoUnsubscribe(HTMLEl
     connectedCallback() {
         if (!this.shadowRoot) return
         const form = this.shadowRoot.querySelector('form')
-        form.addEventListener('input', enableSubmitOnValidInput)
         form.addEventListener('submit', e => {
             e.preventDefault()
             const formData = new FormData(e.currentTarget)

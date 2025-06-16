@@ -1,5 +1,4 @@
 ﻿import {autoUnsubscribe} from "./mixins.mjs";
-import {disableSubmitOnFormChange} from "./dom-utils.mjs";
 
 function render(tags) {
     return Array.from(tags)
@@ -19,14 +18,13 @@ customElements.define('input-tag', class extends autoUnsubscribe(HTMLElement) {
         <form>
             <label for="tag">Tag</label>
             <input type="text" id="tag" name="tag" pattern="^\\S+$" title="A tag must be a word or hyphenated word" required/>
-            <input type="submit" value="Add Tag" disabled/>
+            <input type="submit" value="Add Tag" />
         </form>`
 
         shadowRoot.addEventListener('input', e => e.stopImmediatePropagation())
 
         const form = shadowRoot.querySelector('form')
         
-        disableSubmitOnFormChange(form)
         form.addEventListener('submit', e => e.preventDefault())
 
         
@@ -37,10 +35,7 @@ customElements.define('input-tag', class extends autoUnsubscribe(HTMLElement) {
             list.innerHTML = render(tags)
         })
         
-        form.addEventListener('submit', () => {
-            form.reset()
-            disableSubmitOnFormChange(form)
-        })
+        form.addEventListener('submit', () => form.reset())
     }
     
 })
